@@ -296,30 +296,6 @@ Wait for nodes to reboot and apply the configuration:
 oc get mcp -w
 ```
 
-### Network Architecture with Storage VLAN
-
-```
-┌─────────────────────────────────────────┐
-│   OpenShift Worker Node                 │
-│                                          │
-│  ┌────────────────┐  ┌────────────────┐│
-│  │  Management    │  │  Storage VLAN  ││
-│  │  ens192        │  │  ens192.100    ││
-│  │  10.0.0.x      │  │  192.168.100.x ││
-│  └────────┬───────┘  └────────┬───────┘│
-└───────────┼──────────────────┼─────────┘
-            │                   │
-            │                   │ iSCSI Traffic (Isolated)
-            │                   │
-            │                   │
-┌───────────┼──────────────────┼─────────┐
-│   Dell Unity 480                        │
-│                                          │
-│  Management:     10.0.0.100             │
-│  iSCSI Portal 1: 192.168.100.20 (VLAN)  │
-│  iSCSI Portal 2: 192.168.100.21 (VLAN)  │
-└──────────────────────────────────────────┘
-```
 
 **Benefits of Dedicated Storage VLAN:**
 - **Isolated traffic**: Storage traffic doesn't compete with application traffic
