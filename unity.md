@@ -603,4 +603,4 @@ oc get pvc test-pvc
 - If using storage VLAN, ensure Unity iSCSI portals are configured on the same VLAN
 - Use jumbo frames (MTU 9000) on storage VLAN for better performance
 
-This setup uses the Dell CSI Operator, which is the recommended method for OpenShift deployments and provides automated lifecycle management of the CSI driver.
+
