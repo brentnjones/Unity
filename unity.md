@@ -33,25 +33,26 @@
 ## Step 2: Prepare OpenShift Nodes
 
 1. **Install iSCSI initiator on all worker nodes:**
-   ```bash
-   # Create MachineConfig to install iscsi-initiator-utils
-   oc apply -f - <<EOF
-   apiVersion: machineconfiguration.openshift.io/v1
-   kind: MachineConfig
-   metadata:
-     labels:
-       machineconfiguration.openshift.io/role: worker
-     name: 99-worker-iscsi
-   spec:
-     config:
-       ignition:
-         version: 3.2.0
-       systemd:
-         units:
-         - enabled: true
-           name: iscsid.service
-   EOF
-   ```
+
+```bash
+# Create MachineConfig to install iscsi-initiator-utils
+oc apply -f - <<'EOF'
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-master-iscsi
+spec:
+  config:
+    ignition:
+      version: 3.2.0
+    systemd:
+      units:
+      - enabled: true
+        name: iscsid.service
+EOF
+```
 
 2. **Verify iSCSI service status** (nodes will reboot):
    ```bash
@@ -245,13 +246,13 @@ iscsiadm -m discovery -t st -p 192.168.100.21:3260 -I ens192.100
 ### Configure Multipath for High Availability
 
 ```bash
-cat <<EOF | oc apply -f -
+cat <<'EOF' | oc apply -f -
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
 metadata:
   labels:
-    machineconfiguration.openshift.io/role: worker
-  name: 99-worker-multipath-conf
+    machineconfiguration.openshift.io/role: master
+  name: 99-master-multipath-conf
 spec:
   config:
     ignition:
@@ -578,5 +579,6 @@ oc get pvc test-pvc
 - **Recommended**: Configure multipathing for high availability (included in Step 2A)
 - If using storage VLAN, ensure Unity iSCSI portals are configured on the same VLAN
 - Use jumbo frames (MTU 9000) on storage VLAN for better performance
+- **Single-node clusters**: This example uses the `master` role because your cluster has control-plane nodes with the worker role. For multi-node clusters with separate worker pools, use `worker` instead.
 
 
