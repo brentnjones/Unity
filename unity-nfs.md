@@ -295,7 +295,7 @@ oc rsh nfs-dynamic-test ls -la /data
 
 ### Create a VM with NFS Storage
 
-You can create a KubeVirt VM using the NFS StorageClass by explicitly specifying it in the dataVolumeTemplates:
+You can create a KubeVirt VM using the NFS StorageClass by explicitly specifying it in the dataVolumeTemplates. This example includes cloud-init to set credentials:
 
 ```bash
 cat <<EOF | oc apply -f -
@@ -303,6 +303,7 @@ apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   name: test-nfs-vm
+  namespace: demo
 spec:
   dataVolumeTemplates:
   - metadata:
@@ -327,6 +328,9 @@ spec:
           - disk:
               bus: virtio
             name: datavolumedisk1
+          - disk:
+              bus: virtio
+            name: cloudinitdisk
         resources:
           requests:
             memory: 2Gi
@@ -334,15 +338,30 @@ spec:
       - dataVolume:
           name: test-nfs-vm-disk
         name: datavolumedisk1
+      - cloudInitNoCloud:
+          userData: |
+            #cloud-config
+            password: redhat
+            chpasswd: { expire: False }
+            ssh_pwauth: True
+        name: cloudinitdisk
 EOF
 ```
 
 Check the VM status:
 
 ```bash
-oc get vm test-nfs-vm
-oc get vmi test-nfs-vm
-oc get pvc | grep test-nfs-vm
+oc get vm test-nfs-vm -n demo
+oc get vmi test-nfs-vm -n demo
+oc get pvc -n demo | grep test-nfs-vm
+```
+
+Access the VM console with credentials:
+- **Username**: `fedora`
+- **Password**: `redhat`
+
+```bash
+virtctl console test-nfs-vm -n demo
 ```
 
 **Note:** NFS storage works for VMs but may have slower performance than block storage (iSCSI). Use NFS when ReadWriteMany access is needed or for testing purposes.
