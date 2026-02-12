@@ -323,6 +323,11 @@ spec:
   template:
     spec:
       domain:
+        cpu:
+          model: Skylake-Client-noTSX-IBRS
+          sockets: 1
+          cores: 1
+          threads: 1
         devices:
           disks:
           - disk:
